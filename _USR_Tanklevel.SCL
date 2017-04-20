@@ -1,0 +1,238 @@
+FUNCTION_BLOCK FB403
+
+VAR_INPUT
+    Tanklevel_Prozent:REAL;
+    
+    Kegelstumpf_Oben:BOOL;
+    Kegelstumpf_Oben_Hoehe:REAL;
+    Kegelstumpf_Oben_DM_gr:REAL;
+    Kegelstumpf_Oben_DM_kl:REAL;
+    
+    Kegelstumpf_Unten:BOOL;
+    Kegelstumpf_Unten_Hoehe:REAL;
+    Kegelstumpf_Unten_DM_gr:REAL;
+    Kegelstumpf_Unten_DM_kl:REAL;
+    
+    Zylinder_Stehend:BOOL;
+    Zylinder_Stehend_Hoehe:REAL;
+    Zylinder_Stehend_DM:REAL;
+    
+    Zylinder_Liegend:BOOL;
+    Zylinder_Liegend_Hoehe:REAL;
+    Zylinder_Liegend_Laenge:REAL;
+    Zylinder_Liegend_DM:REAL;
+END_VAR
+
+CONST
+    Pi := 3.1415926;
+END_CONST
+
+VAR_TEMP
+    // temporäre Variablen
+    a, b, c, d: REAL;
+    Kegelstumpf : STRUCT
+        Oben:STRUCT
+            Hoehe : REAL;
+            Radius_gross : REAL;
+            Radius_klein:REAL;
+            Volumen_Liter:REAL;
+            Volumen_Prozent:REAL;
+            Winkel:REAL;
+        END_STRUCT;
+        
+        Unten:STRUCT
+            Hoehe : REAL;
+            Radius_gross : REAL;
+            Radius_klein : REAL;
+            Volumen_Liter:REAL;
+            Volumen_Prozent:REAL;
+            Winkel:REAL;
+        END_STRUCT;
+    END_STRUCT;
+    
+    Zylinder : STRUCT
+        Stehend : STRUCT
+            Hoehe: REAL;
+            Radius : REAL;
+            Volumen_Liter:REAL;
+            Volumen_Prozent:REAL;
+        END_STRUCT;
+        
+        Liegend : STRUCT
+            Hoehe: REAL;
+            Laenge : REAL;
+            Radius : REAL;
+            Volumen_Liter:REAL;
+            Volumen_Prozent:REAL;
+        END_STRUCT;
+    END_STRUCT;
+    
+    Nennvolumen : STRUCT
+        Prozent : STRUCT
+            Tank:REAL;
+            Oben:REAL;
+            Unten:REAL;
+        END_STRUCT;
+        Liter : STRUCT
+            Tank:REAL;
+            Oben:REAL;
+            Unten:REAL;
+        END_STRUCT;
+    END_STRUCT;
+    
+    Istvolumen : STRUCT
+        Prozent : STRUCT
+            Tank:REAL;
+            Oben:REAL;
+            Unten:REAL;
+        END_STRUCT;
+        Liter : STRUCT
+            Tank:REAL;
+            Oben:REAL;
+            Unten:REAL;
+        END_STRUCT;
+    END_STRUCT;
+            
+    Hoehe : STRUCT
+        Tank:REAL;
+        Oben:REAL;
+        Unten:REAL;
+        Ist:REAL;
+    END_STRUCT;
+      
+END_VAR
+
+VAR_OUTPUT
+    Tanklevel_Liter:REAL;
+END_VAR
+
+    // Anweisungsteil
+    // Beim Initialisieren alle Volumen_Liter resetten
+    Kegelstumpf.Oben.Volumen_Liter := 0.0;
+    Kegelstumpf.Unten.Volumen_Liter := 0.0;
+    Zylinder.Stehend.Volumen_Liter := 0.0;
+    Zylinder.Liegend.Volumen_Liter := 0.0;
+    Kegelstumpf.Oben.Volumen_Prozent := 0.0;
+    Kegelstumpf.Unten.Volumen_Prozent := 0.0;
+    Zylinder.Stehend.Volumen_Prozent := 0.0;
+    Zylinder.Liegend.Volumen_Prozent := 0.0;
+    Hoehe.Tank := 0.0;
+    Hoehe.Oben := 0.0;
+    Hoehe.Unten := 0.0;
+    Istvolumen.Liter.Tank := 0.0;
+    
+    //Berechnung Nennvolumen in Liter der Tankabschnitte
+    IF Kegelstumpf_Oben THEN
+        Kegelstumpf.Oben.Hoehe := Kegelstumpf_Oben_Hoehe;
+        Kegelstumpf.Oben.Radius_gross := Kegelstumpf_Oben_DM_gr/2;
+        Kegelstumpf.Oben.Radius_klein := Kegelstumpf_Oben_DM_kl/2;
+        Kegelstumpf.Oben.Winkel := ATAN((Kegelstumpf.Oben.Radius_gross - Kegelstumpf.Oben.Radius_klein) / Kegelstumpf.Oben.Hoehe);
+        Kegelstumpf.Oben.Volumen_Liter := ((Kegelstumpf.Oben.Hoehe * Pi / 3) * (Kegelstumpf.Oben.Radius_gross **2 + Kegelstumpf.Oben.Radius_gross * Kegelstumpf.Oben.Radius_klein + Kegelstumpf.Oben.Radius_klein **2))/1000000;
+    END_IF;
+    
+    IF Kegelstumpf_Unten THEN
+        Kegelstumpf.Unten.Hoehe := Kegelstumpf_Unten_Hoehe;
+        Kegelstumpf.Unten.Radius_gross := Kegelstumpf_Unten_DM_gr/2;
+        Kegelstumpf.Unten.Radius_klein := Kegelstumpf_Unten_DM_kl/2;
+        Kegelstumpf.Unten.Winkel := ATAN((Kegelstumpf.Unten.Radius_gross - Kegelstumpf.Unten.Radius_klein) / Kegelstumpf.Unten.Hoehe);
+        Kegelstumpf.Unten.Volumen_Liter := ((Kegelstumpf.Unten.Hoehe * Pi / 3) * (Kegelstumpf.Unten.Radius_gross **2 + Kegelstumpf.Unten.Radius_gross * Kegelstumpf.Unten.Radius_klein + Kegelstumpf.Unten.Radius_klein **2))/1000000;
+    END_IF;
+    
+    IF Zylinder_Stehend THEN
+        Zylinder.Stehend.Hoehe := Zylinder_Stehend_Hoehe;
+        Zylinder.Stehend.Radius := Zylinder_Stehend_DM/2;
+        Zylinder.Stehend.Volumen_Liter := (Pi * Zylinder.Stehend.Radius**2 * Zylinder.Stehend.Hoehe)/1000000;
+    END_IF;
+    
+    IF Zylinder_Liegend THEN
+        Zylinder.Liegend.Hoehe := Zylinder_Liegend_Hoehe;
+        Zylinder.Liegend.Laenge := Zylinder_Liegend_Laenge;
+        Zylinder.Liegend.Radius := Zylinder_Liegend_DM/2;
+        a := Zylinder.Liegend.Radius**2 * Zylinder.Liegend.Laenge;
+        b := ACOS((Zylinder.Liegend.Radius - Zylinder.Liegend.Hoehe)/Zylinder.Liegend.Radius);
+        c := Zylinder.Liegend.Radius - Zylinder.Liegend.Hoehe;
+        d:= SQRT(2*Zylinder.Liegend.Radius*Zylinder.Liegend.Hoehe - Zylinder.Liegend.Hoehe**2);
+        Zylinder.Liegend.Volumen_Liter := (a * (b - c *(d/Zylinder.Liegend.Radius**2)))/1000000;
+    END_IF;
+    
+    // Berechnung Gesamtvolumen des Tanks in Liter 
+    IF Zylinder_Stehend then
+        Nennvolumen.Liter.Tank := Kegelstumpf.Oben.Volumen_Liter + Kegelstumpf.Unten.Volumen_Liter + Zylinder.Stehend.Volumen_Liter;
+    ELSIF Zylinder_Liegend then
+        Nennvolumen.Liter.Tank := Zylinder.Liegend.Volumen_Liter;
+    END_IF;
+    
+    // Berechnung Nennvolumen in Prozent der Tankabschnitte
+    IF Kegelstumpf_Oben then
+        Kegelstumpf.Oben.Volumen_Prozent := Kegelstumpf.Oben.Volumen_Liter / Nennvolumen.Liter.Tank;
+        Hoehe.Oben := Kegelstumpf.Oben.Hoehe;
+    END_IF;
+    
+    IF Kegelstumpf_Unten then
+        Kegelstumpf.Unten.Volumen_Prozent := Kegelstumpf.Unten.Volumen_Liter / Nennvolumen.Liter.Tank;
+        Hoehe.Unten := Kegelstumpf.Unten.Hoehe;
+    END_IF;
+    
+    IF Zylinder_Stehend then
+        Zylinder.Stehend.Volumen_Prozent := Zylinder.Stehend.Volumen_Liter / Nennvolumen.Liter.Tank;
+        Hoehe.Tank := Hoehe.Oben + Hoehe.Unten + Zylinder.Stehend.Hoehe;
+    END_IF;
+    
+    IF Zylinder_Liegend then
+        Zylinder.Liegend.Volumen_Prozent := Zylinder.Liegend.Volumen_Liter / Nennvolumen.Liter.Tank;
+        Hoehe.Tank :=  Zylinder.Liegend.Hoehe;
+    END_IF;
+    
+    // Berechnung Gesamtvolumen des Tanks in Prozent 
+    IF Zylinder_Stehend then
+        Nennvolumen.Prozent.Tank := Kegelstumpf.Oben.Volumen_Prozent + Kegelstumpf.Unten.Volumen_Prozent + Zylinder.Stehend.Volumen_Prozent;
+        Nennvolumen.Prozent.Unten := Kegelstumpf.Unten.Volumen_Prozent;
+        Nennvolumen.Prozent.Oben := Kegelstumpf.Oben.Volumen_Prozent;
+    ELSIF Zylinder_Liegend then
+        Nennvolumen.Prozent.Tank := Zylinder.Liegend.Volumen_Prozent;
+    END_IF;
+    
+    // Berechnung Gesamtvolumen des Tanks in Liter 
+    IF Zylinder_Stehend then
+        Nennvolumen.Liter.Tank := Kegelstumpf.Oben.Volumen_Liter + Kegelstumpf.Unten.Volumen_Liter + Zylinder.Stehend.Volumen_Liter;
+        Nennvolumen.Liter.Unten := Kegelstumpf.Unten.Volumen_Liter;
+        Nennvolumen.Liter.Oben := Kegelstumpf.Oben.Volumen_Liter;
+    ELSIF Zylinder_Liegend then
+        Nennvolumen.Liter.Tank := Zylinder.Liegend.Volumen_Liter;
+    END_IF;
+    
+    // Berechnung Ist-Volumen des Tanks in Liter
+    Istvolumen.Prozent.Tank := Tanklevel_Prozent/100;
+    IF Zylinder_Stehend then
+        // Füllhöhe im oberen Tankabschnitt (Kegelstumpf)
+        IF (Istvolumen.Prozent.Tank >= ((Hoehe.Unten + Zylinder.Stehend.Hoehe)/Hoehe.Tank)) THEN
+            Hoehe.Ist := Hoehe.Oben - (Hoehe.Tank - Hoehe.Tank * Istvolumen.Prozent.Tank);
+            Kegelstumpf.Oben.Radius_klein := Kegelstumpf.Oben.Radius_gross - (TAN(Kegelstumpf.Oben.Winkel) * Hoehe.Ist);
+            Istvolumen.Liter.Oben := ((Hoehe.Ist * Pi / 3) * (Kegelstumpf.Oben.Radius_gross **2 + Kegelstumpf.Oben.Radius_gross * Kegelstumpf.Oben.Radius_klein + Kegelstumpf.Oben.Radius_klein **2))/1000000;
+            Istvolumen.Liter.Tank := Istvolumen.Liter.Oben + Nennvolumen.Liter.Unten + Zylinder.Stehend.Volumen_Liter;
+        // Füllhöhe im mittleren Tankabschnitt (Zylinder)
+        ELSIF (Istvolumen.Prozent.Tank >= (Hoehe.Unten/Hoehe.Tank)) THEN
+            Hoehe.Ist := Hoehe.Tank * Istvolumen.Prozent.Tank - Hoehe.Unten;
+            Istvolumen.Liter.Tank := Nennvolumen.Liter.Unten + (Pi * Zylinder.Stehend.Radius**2 * Hoehe.Ist)/1000000;
+        // Füllhöhe im unteren Tankabschnitt (Kegelstumpf)     
+        ELSIF (Istvolumen.Prozent.Tank <= (Hoehe.Unten/Hoehe.Tank)) THEN
+            Hoehe.Ist := Hoehe.Tank * Istvolumen.Prozent.Tank;
+            Kegelstumpf.Unten.Radius_gross := Hoehe.Ist * TAN(Kegelstumpf.Unten.Winkel);
+            Istvolumen.Liter.Tank := ((Hoehe.Ist * Pi / 3) * (Kegelstumpf.Unten.Radius_gross **2 + Kegelstumpf.Unten.Radius_gross * Kegelstumpf.Unten.Radius_klein + Kegelstumpf.Unten.Radius_klein **2))/1000000;
+        // Fehler
+        ELSIF (Istvolumen.Prozent.Tank < 0) then
+            Istvolumen.Liter.Tank := -1;
+        END_IF;
+    ELSIF Zylinder_Liegend then
+        Hoehe.Ist := Hoehe.Tank * Istvolumen.Prozent.Tank;
+        a := Zylinder.Liegend.Radius**2 * Zylinder.Liegend.Laenge;
+        b := ACOS((Zylinder.Liegend.Radius - Hoehe.Ist)/Zylinder.Liegend.Radius);
+        c := Zylinder.Liegend.Radius - Hoehe.Ist;
+        d := SQRT(2*Zylinder.Liegend.Radius*Hoehe.Ist - Hoehe.Ist**2);
+        Istvolumen.Liter.Tank := (a * (b - c *(d/Zylinder.Liegend.Radius**2)))/1000000;
+    END_IF;
+    
+    //Ausgabe
+    Tanklevel_Liter := Istvolumen.Liter.Tank;
+    
+END_FUNCTION_BLOCK
