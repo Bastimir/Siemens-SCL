@@ -1,0 +1,29 @@
+FUNCTION_BLOCK FB403
+
+VAR_INPUT
+    Tanklevel_Prozent:REAL;
+    
+    Kegelstumpf_Oben:BOOL;
+    Kegelstumpf_Oben_Hoehe:REAL;
+    Kegelstumpf_Oben_DM_gr:REAL;
+    Kegelstumpf_Oben_DM_kl:REAL;
+    
+    Kegelstumpf_Unten:BOOL;
+    Kegelstumpf_Unten_Hoehe:REAL;
+    Kegelstumpf_Unten_DM_gr:REAL;
+    Kegelstumpf_Unten_DM_kl:REAL;
+    
+    Zylinder_Stehend:BOOL;
+    Zylinder_Stehend_Hoehe:REAL;
+    Zylinder_Stehend_DM:REAL;
+    
+    Zylinder_Liegend:BOOL;
+    Zylinder_Liegend_Hoehe:REAL;
+    Zylinder_Liegend_Laenge:REAL;
+    Zylinder_Liegend_DM:REAL;
+END_VAR
+
+CONST
+    Pi := 3.1415926;
+END_CONST
+
